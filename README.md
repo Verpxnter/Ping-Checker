@@ -17,19 +17,24 @@ Ping-Checker is a real-time web application that monitors and visualizes network
     cd ping-checker
     ```
 
-2. Install dependencies (if required):
+2. Install dependencies:
     ```bash
-    npm install
+    pip install -r requirements.txt
     ```
 
-3. Start the server:
+3. Add the rights:
     ```bash
-    npm start
+    sudo chmod +x run.sh run.py
+    ```
+
+4. Run the file:
+    ```bash
+    sudo ./run.sh
     ```
 
 4. Open the application in your browser:
     ```
-    http://localhost:1234
+    http://<UR-IP>:1234/
     ```
 
 ## Usage
