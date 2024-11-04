@@ -13,7 +13,7 @@ Ping-Checker is a real-time web application that monitors and visualizes network
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/your-username/ping-checker.git
+    git clone https://github.com/verpxnter/ping-checker.git
     cd ping-checker
     ```
 
