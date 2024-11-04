@@ -19,7 +19,7 @@ Ping-Checker is a robust, real-time web application designed to monitor and visu
     ```
 
 2. **Change the Webhook:**
-    In the file `run.py` change following:
+    In the file `run.py` change following to your Webhook:
     ```bash
     DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/<webhook>"
     ```
