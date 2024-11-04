@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ping Monitor</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@latest"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            background-color: #121212;
+            color: #ffffff;
+        }
+        .chart-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        canvas {
+            width: 100%;
+            max-height: 100%;
+        }
+        .info-container {
+            width: 300px;
+            padding: 20px;
+            background-color: #1e1e1e;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+        h1, h3 {
+            margin: 10px 0;
+        }
+        h3 {
+            color: #b0b0b0;
+        }
+    </style>
+</head>
+<body>
+    <div class="chart-container">
+        <canvas id="pingChart"></canvas>
+    </div>
+    <div class="info-container">
+        <h1>Ping Monitor</h1>
+        <h3>Current Ping: <br><span id="currentPing">0</span> ms</h3>
+        <h3>Highest Ping: <br><span id="highestPing" title="">0</span> ms</h3>
+        <h3>Lowest Ping: <br><span id="lowestPing" title="">0</span> ms</h3>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('pingChart').getContext('2d');
+        const pingData = {
+            labels: [],
+            datasets: [{
+                label: 'Ping Time (ms)',
+                data: [],
+                borderColor: 'purple',
+                fill: false,
+                tension: 0.1
+            }]
+        };
+
+        const pingChart = new Chart(ctx, {
+            type: 'line',
+            data: pingData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        title: {
+                            display: false
+                        },
+                        ticks: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Ping Time (ms)',
+                            color: '#ffffff'
+                        },
+                        ticks: {
+                            color: '#ffffff'
+                        },
+                        suggestedMin: 0,
+                        suggestedMax: 50 
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#ffffff'
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                const index = tooltipItems[0].dataIndex;
+                                const timestamp = pingData.labels[index];
+                                return dateFns.format(new Date(timestamp), 'dd-MM-yy HH:mm');
+                            },
+                            label: function(tooltipItem) {
+                                return `Ping: ${tooltipItem.raw} ms`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        function getPingColor(ping) {
+            if (ping <= 20) return 'green';
+            if (ping <= 50) return 'lightgreen';
+            if (ping <= 100) return 'yellow';
+            if (ping <= 150) return 'orange';
+            if (ping <= 300) return 'red';
+            return 'darkred';
+        }
+
+        function updatePingStats(data) {
+            const currentPingColor = getPingColor(data.ping_time);
+            document.getElementById('currentPing').textContent = data.ping_time;
+            document.getElementById('currentPing').style.color = currentPingColor;
+
+            const highestPingElement = document.getElementById('highestPing');
+            const lowestPingElement = document.getElementById('lowestPing');
+
+            if (data.ping_time > parseInt(highestPingElement.textContent)) {
+                highestPingElement.textContent = data.ping_time;
+                highestPingElement.style.color = currentPingColor;
+            }
+
+            if (data.ping_time < parseInt(lowestPingElement.textContent) || lowestPingElement.textContent === '0') {
+                lowestPingElement.textContent = data.ping_time;
+                lowestPingElement.style.color = currentPingColor;
+            }
+
+            pingData.labels.push(Date.now());
+        }
+
+        function adjustYAxisMax() {
+            const maxPingValue = Math.max(...pingData.datasets[0].data);
+            pingChart.options.scales.y.suggestedMax = maxPingValue + 10;
+            pingChart.update();
+        }
+
+        function fetchPing() {
+            fetch('/ping')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    updatePingStats(data);
+
+                    if (!isNaN(data.ping_time)) {
+                        pingData.datasets[0].data.push(data.ping_time);
+
+                        adjustYAxisMax();
+                    }
+                })
+                .catch(error => console.error('Error fetching ping data:', error));
+        }
+
+        setInterval(fetchPing, 1000);
+    </script>
+</body>
+</html>
