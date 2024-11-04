@@ -18,25 +18,31 @@ Ping-Checker is a robust, real-time web application designed to monitor and visu
     cd ping-checker
     ```
 
-2. **Install required dependencies:**
+2. **Change the Webhook:**
+    In the file `run.py` change following:
+    ```bash
+    DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/<webhook>"
+    ```
+
+3. **Install required dependencies:**
     Ensure Python and pip are installed, then run:
     ```bash
     pip install -r requirements.txt
     ```
 
-3. **Adjust file permissions:**
+4. **Adjust file permissions:**
     Give execution rights to the necessary scripts:
     ```bash
     sudo chmod +x run.sh run.py
     ```
 
-4. **Run the application:**
+5. **Run the application:**
     Start the server by executing:
     ```bash
     sudo ./run.sh
     ```
 
-5. **Access the application in your browser:**
+6. **Access the application in your browser:**
     Replace `<YOUR-IP>` with your server's IP address:
     ```
     http://<YOUR-IP>:1234/
